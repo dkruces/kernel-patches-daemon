@@ -96,6 +96,12 @@ def parse_args() -> argparse.Namespace:
         choices=["start", "purge"],
         help="Purge will kill all existing PRs and delete all branches",
     )
+    parser.add_argument(
+        "--enable-console-metrics",
+        action="store_true",
+        default=False,
+        help="Enable OpenTelemetry metrics output to console (stdout) in JSON format",
+    )
     args = parser.parse_args()
     return args
 
@@ -113,9 +119,14 @@ if __name__ == "__main__":
     metrics_logger_script = os.path.expanduser(args.metric_logger)
     script_metrics_logger = ScriptMetricsExporter(metrics_logger_script)
 
+    # Only enable console metrics export if explicitly requested
+    metric_readers = []
+    if args.enable_console_metrics:
+        metric_readers.append(PeriodicExportingMetricReader(ConsoleMetricExporter()))
+
     meter_provider = MeterProvider(
         resource=Resource(attributes={"service_name": "kernel_patches_daemon"}),
-        metric_readers=[PeriodicExportingMetricReader(ConsoleMetricExporter())],
+        metric_readers=metric_readers,
     )
     metrics.set_meter_provider(meter_provider)
 

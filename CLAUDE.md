@@ -48,6 +48,14 @@ poetry run python -m kernel_patches_daemon --config <config_path> --label-colors
 
 # Purge all PRs and branches (destructive)
 poetry run python -m kernel_patches_daemon --config <config_path> --action purge
+
+# Enable OpenTelemetry console metrics (JSON output to stdout)
+# Note: Console metrics are disabled by default to reduce log clutter
+poetry run python -m kernel_patches_daemon --config <config_path> --label-colors configs/labels.json --enable-console-metrics
+
+# Use external script for custom metrics processing
+# The --metric-logger expects an executable script that receives JSON metrics via stdin
+poetry run python -m kernel_patches_daemon --config <config_path> --label-colors configs/labels.json --metric-logger /path/to/metrics_processor.sh
 ```
 
 ### Docker
@@ -158,6 +166,9 @@ docker pull ghcr.io/kernel-patches/kernel-patches-daemon:latest
 - Python 3.10+ required
 - Type hints present but marked `# pyre-unsafe` in most files
 - OpenTelemetry metrics throughout for observability
+  - Console metrics disabled by default (use `--enable-console-metrics` to enable)
+  - Metrics exported via `--metric-logger` to executable scripts for custom processing
+  - Metrics include: sync timing, git operations, PR lifecycle, API requests, errors
 
 ## Contributing
 
